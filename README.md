@@ -36,10 +36,26 @@
 
 ## 🔧 사용 기술 스택
 
-| 영역       | 기술                                         |
-| ---------- | -------------------------------------------- |
-| 프레임워크 | Vue.js 3 (Composition API)                   |
-| 빌드 도구  | Vite                                         |
-| 상태관리   | ref, reactive, props, emits 등 Vue 기본 기능 |
-| HTTP 통신  | Axios                                        |
-| 배포       | Netlify                                      |
+| 영역       | 기술                                                                                        |
+| ---------- | ------------------------------------------------------------------------------------------- |
+| 프레임워크 | Vue.js 3 (Composition API)                                                                  |
+| 빌드 도구  | Vite                                                                                        |
+| 상태관리   | main 브랜치: ref, reactive, props, emits 등 Vue 기본 기능 <br> pinia-refactor 브랜치: Pinia |
+| HTTP 통신  | Axios                                                                                       |
+| 배포       | Netlify                                                                                     |
+
+<br>
+
+## 📂 브랜치 설명
+
+### **main** 브랜치
+
+- **기본 프로젝트**: Vue 3 Composition API를 기반으로, 코딩애플 강의를 수강한 후 기능을 수정하여 만든 인스타그램 클론 프로젝트입니다.
+
+### **v-model-refactor** 브랜치
+
+- **`textarea` 양방향 데이터 바인딩**: 사용자 입력을 처리하기 위해 props와 emit을 사용하던 방식에서 v-model을 활용하여 **textarea**의 값 변경을 양방향 바인딩 방식으로 변경하였습니다.
+
+### **pinia-refactor** 브랜치
+
+- **Pinia 상태 관리 추가**: 기존 상태 관리 방식을 Pinia로 교체하여 상태 관리를 중앙화하고, 컴포넌트 간 데이터 공유 및 상태 업데이트를 개선했습니다.
