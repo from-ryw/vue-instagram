@@ -1,37 +1,35 @@
 <!-- script -->
 <script setup>
-import { ref } from 'vue';
+import { ref } from 'vue'
 
 const props = defineProps({
-                post: {
-                  name: String,
-                  userImage: String,
-                  postImage: String,
-                  likes: Number,
-                  date: String,
-                  liked: Boolean,
-                  content: String,
-                  filter: String
-                }
-              });
-const emit = defineEmits(['toggle-like']);
-const heartRef = ref(null);
+  post: {
+    name: String,
+    userImage: String,
+    postImage: String,
+    likes: Number,
+    date: String,
+    liked: Boolean,
+    content: String,
+    filter: String,
+  },
+})
+const emit = defineEmits(['toggle-like'])
+const heartRef = ref('')
 
 // post-body 또는 heart 클릭 시, like toggle 이벤트
 function toggleLike() {
-  emit('toggle-like'); // Container.vue(부모)에게 전달
+  emit('toggle-like') // Container.vue(부모)에게 전달
 
-   // 하트 애니메이션
-   if (heartRef.value) {
+  // 하트 애니메이션
+  if (heartRef.value) {
     heartRef.value.classList.add('heart-active')
     setTimeout(() => {
       heartRef.value.classList.remove('heart-active')
     }, 250)
   }
 }
-
 </script>
-
 
 <!-- template -->
 <template>
@@ -40,21 +38,24 @@ function toggleLike() {
       <div class="profile" :style="{ backgroundImage: `url(${post.userImage})` }"></div>
       <span class="profile-name">{{ post.name }}</span>
     </div>
-    <div class="post-body" 
-        :class="`${post.filter}`" 
-        :style="{ backgroundImage: `url(${post.postImage})`}"
-        @click="toggleLike"></div>
+    <div
+      class="post-body"
+      :class="`${post.filter}`"
+      :style="{ backgroundImage: `url(${post.postImage})` }"
+      @click="toggleLike"
+    ></div>
     <div class="post-content">
       <div class="like-row">
         <span class="heart" ref="heartRef" @click="toggleLike">{{ post.liked ? '❤️' : '🤍' }}</span>
-        <p>{{ post.likes }} Likes </p>
+        <p>{{ post.likes }} Likes</p>
       </div>
-      <p><strong>{{ post.name }}</strong> {{ post.content }}</p>
+      <p>
+        <strong>{{ post.name }}</strong> {{ post.content }}
+      </p>
       <p class="date">{{ post.date }}</p>
     </div>
   </div>
 </template>
-
 
 <!-- style -->
 <style>
@@ -63,7 +64,7 @@ function toggleLike() {
   padding-bottom: 20px;
 }
 .profile {
-  background-image: url("https://picsum.photos/100?random=0");
+  background-image: url('https://picsum.photos/100?random=0');
   width: 30px;
   height: 30px;
   background-size: 100%;
@@ -82,7 +83,7 @@ function toggleLike() {
   padding: 10px;
 }
 .post-body {
-  background-image: url("https://picsum.photos/600?random=0");
+  background-image: url('https://picsum.photos/600?random=0');
   height: 450px;
   background-position: center;
   background-size: cover;
