@@ -1,23 +1,27 @@
 <!-- script -->
 <script setup>
-const props = defineProps({ 
-              uploadFileURL: String,
-              filter: String,
-              isSelected: Boolean
-            });
-const emit = defineEmits(['select-filter']);
-</script>
+import { useUploadStore } from '../stores/uploadStore'
 
+const props = defineProps({
+  filter: String,
+  isSelected: Boolean,
+})
+
+const uploadStore = useUploadStore()
+</script>
 
 <!-- template -->
 <template>
   <div class="filter-box">
     <p class="filter-name">{{ filter }}</p>
-    <div class="filter-item" :class="[filter, { selected: isSelected }]"
-        :style="{ backgroundImage: `url(${uploadFileURL})`}" @click="emit('select-filter', filter)"></div>
+    <div
+      class="filter-item"
+      :class="[filter, { selected: isSelected }]"
+      :style="{ backgroundImage: `url(${uploadStore.uploadFileURL})` }"
+      @click="uploadStore.setUploadFileFilter(filter)"
+    ></div>
   </div>
 </template>
-
 
 <!-- style -->
 <style>
@@ -38,9 +42,9 @@ const emit = defineEmits(['select-filter']);
   margin: 4px 10px 10px auto;
   padding: 8px;
   display: inline-block;
-  color : white;
+  color: white;
   background-size: cover;
-  background-position : center;
+  background-position: center;
 }
 .selected {
   outline: 3px solid #999;
@@ -48,4 +52,4 @@ const emit = defineEmits(['select-filter']);
   border-radius: 6px;
   transition: all 0.2s ease;
 }
-</style> 
+</style>

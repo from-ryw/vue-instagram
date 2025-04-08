@@ -1,66 +1,80 @@
 <!-- script -->
 <script setup>
-import { ref } from 'vue';
-import Post from './Post.vue';
-import FilterBox from './FilterBox.vue';
+import { ref, watch } from 'vue'
+import Post from './Post.vue'
+import FilterBox from './FilterBox.vue'
+import { usePostStore } from '../stores/postStore'
+import { useUploadStore } from '../stores/uploadStore'
 
-const props = defineProps({ 
-                postList: Array,
-                filters: Array,
-                step: Number,
-                uploadFileURL: String,
-                uploadFileFilter: String,
-                uploadContent: String
-              });
-const emit = defineEmits(['toggle-like', 'select-filter', 'write-content']);
+const postStore = usePostStore()
+const uploadStore = useUploadStore()
+
+const props = defineProps({
+  filters: Object,
+})
+
+const localContent = ref(uploadStore.uploadContent)
+watch(localContent, (newVal) => {
+  uploadStore.setUploadContent(newVal)
+})
 </script>
-
 
 <!-- template -->
 <template>
   <div class="container">
     <!-- Post -->
-    <Post v-if="step == 0"
-          v-for="(post, index) in postList" 
-            :key="index" 
-            :post="post"
-          @toggle-like="emit('toggle-like', index)"/>
+    <Post
+      v-if="uploadStore.step == 0"
+      v-for="(post, index) in postStore.postList"
+      :key="index"
+      :post="post"
+      :index="index"
+    />
 
     <!-- FilterBox  -->
-    <div v-if="step == 1">
-      <div class="upload-image" :class="`${uploadFileFilter}`"
-          :style="`background-image:url(${uploadFileURL})`"></div>
+    <div v-if="uploadStore.step == 1">
+      <div
+        class="upload-image"
+        :class="`${uploadStore.uploadFileFilter}`"
+        :style="`background-image:url(${uploadStore.uploadFileURL})`"
+      ></div>
       <div class="filters">
-        <FilterBox v-for="(filter, index) in filters" :key="index"
-              :uploadFileURL="uploadFileURL"
-              :filter="filter"
-              :isSelected="uploadFileFilter === filter"
-              @select-filter="emit('select-filter', $event)" />
+        <FilterBox
+          v-for="(filter, index) in filters"
+          :key="index"
+          :filter="filter"
+          :isSelected="uploadStore.uploadFileFilter === filter"
+        />
       </div>
     </div>
 
     <!-- WriteArea -->
-    <div class="write-area" v-if="step == 2">
-      <div :class="`upload-image ${uploadFileFilter}`" :style="{ backgroundImage: `url(${uploadFileURL})` }"></div>
+    <div class="write-area" v-if="uploadStore.step == 2">
+      <div
+        :class="`upload-image ${uploadStore.uploadFileFilter}`"
+        :style="{ backgroundImage: `url(${uploadStore.uploadFileURL})` }"
+      ></div>
       <div class="write">
-        <textarea class="write-box" placeholder="내용을 입력하세요."
-                  @input="emit('write-content', $event.target.value)"></textarea>
+        <textarea
+          class="write-box"
+          placeholder="내용을 입력하세요."
+          v-model="localContent"
+        ></textarea>
       </div>
     </div>
   </div>
 </template>
 
-
 <!-- style -->
 <style>
-.upload-image{
+.upload-image {
   width: 100%;
   height: 450px;
   background: cornflowerblue;
-  background-size : cover;
+  background-size: cover;
 }
-.filters{
-  overflow-x:scroll;
+.filters {
+  overflow-x: scroll;
   white-space: nowrap;
 }
 .filter-1 {
@@ -70,21 +84,21 @@ const emit = defineEmits(['toggle-like', 'select-filter', 'write-content']);
   margin: 10px 10px 10px auto;
   padding: 8px;
   display: inline-block;
-  color : white;
+  color: white;
   background-size: cover;
 }
 .filters::-webkit-scrollbar {
   height: 5px;
 }
 .filters::-webkit-scrollbar-track {
-  background: #f1f1f1; 
+  background: #f1f1f1;
 }
 .filters::-webkit-scrollbar-thumb {
-  background: #888; 
+  background: #888;
   border-radius: 5px;
 }
 .filters::-webkit-scrollbar-thumb:hover {
-  background: #555; 
+  background: #555;
 }
 .write-box {
   border: none;
@@ -95,4 +109,4 @@ const emit = defineEmits(['toggle-like', 'select-filter', 'write-content']);
   display: block;
   outline: none;
 }
-</style> 
+</style>

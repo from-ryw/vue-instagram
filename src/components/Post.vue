@@ -1,25 +1,26 @@
 <!-- script -->
 <script setup>
 import { ref } from 'vue'
+import { usePostStore } from '../stores/postStore'
 
 const props = defineProps({
   post: {
-    name: String,
-    userImage: String,
-    postImage: String,
-    likes: Number,
-    date: String,
-    liked: Boolean,
-    content: String,
-    filter: String,
+    type: Object,
+    required: true,
+  },
+  index: {
+    type: Number,
+    required: true,
   },
 })
-const emit = defineEmits(['toggle-like'])
+
+const postStore = usePostStore()
+
 const heartRef = ref('')
 
 // post-body 또는 heart 클릭 시, like toggle 이벤트
 function toggleLike() {
-  emit('toggle-like') // Container.vue(부모)에게 전달
+  postStore.toggleLike(props.index)
 
   // 하트 애니메이션
   if (heartRef.value) {

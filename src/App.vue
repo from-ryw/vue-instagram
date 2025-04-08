@@ -3,28 +3,25 @@
 import axios from 'axios'
 import { onMounted, onUnmounted, ref } from 'vue'
 import Container from './components/Container.vue'
-import posts from './assets/posts'
 import filters from './assets/filters'
+import { usePostStore } from './stores/postStore'
+import { useUploadStore } from './stores/uploadStore'
 
-const postList = ref([...posts]) // 화면에서 사용하는 반응형 리스트
+const postStore = usePostStore()
+const uploadStore = useUploadStore()
 
 let lastScrollTop = 0 // 이전 스크롤 위치 기억
-const isLoading = ref(false) // 중복 실행 방지용 플래그
-const count = ref(0) // GET요청 시, 사용하는 count(more1까지만 요청이 가능)
-const realCount = ref(1) // 실제 count
-
-const step = ref(0) // 단계
-const uploadFileURL = ref('') // 업로드 파일 이미지 주소
-const uploadFileFilter = ref('') // 업로드 파일 필터
-const uploadContent = ref('') // 업로드 파일 내용
+let isLoading = false // 중복 실행 방지용 플래그
+let count = 0 // GET요청 시, 사용하는 count(more1까지만 요청이 가능)
+let realCount = 1 // 실제 count
 
 // 포스트 더보기
 async function loadMorePosts() {
-  if (isLoading.value) return // 이미 실행 중이면 무시
+  if (isLoading) return // 이미 실행 중이면 무시
 
-  isLoading.value = true // 실행 시작
+  isLoading = true // 실행 시작
   try {
-    const result = await axios.get(`https://codingapple1.github.io/vue/more${count.value}.json`)
+    const result = await axios.get(`https://codingapple1.github.io/vue/more${count}.json`)
 
     // postImage 랜덤으로 바꾸기
     result.data.postImage = 'https://picsum.photos/600?random=' + Math.floor(Math.random() * 100)
@@ -33,17 +30,17 @@ async function loadMorePosts() {
     result.data.filter = filters[Math.floor(Math.random() * filters.length)]
 
     // content 숫자 바꾸기
-    result.data.content = result.data.content.replace(/\d+/, realCount.value)
-    postList.value.push(result.data)
+    result.data.content = result.data.content.replace(/\d+/, realCount)
+    postStore.addPostToBottom(result.data)
 
     // 카운트 업데이트
-    realCount.value++
-    count.value = (count.value + 1) % 2 // 0 → 1 → 0 반복(GET요청이 1까지만 가능하므로 변경)
+    realCount++
+    count = (count + 1) % 2 // 0 → 1 → 0 반복(GET요청이 1까지만 가능하므로 변경)
   } catch (err) {
     console.log(err.message)
     console.log('실패')
   } finally {
-    isLoading.value = false // 완료되면 다시 실행 가능하게 설정
+    isLoading = false // 완료되면 다시 실행 가능하게 설정
   }
 }
 
@@ -73,54 +70,29 @@ onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
 })
 
-// like toggle 함수
-function handleToggleLike(index) {
-  const post = postList.value[index]
-  post.liked = !post.liked
-  if (post.liked) {
-    post.likes++
-  } else {
-    post.likes--
+// Publish 함수
+function publish() {
+  let myPost = {
+    name: 'Ryu Yewon',
+    userImage: 'https://picsum.photos/100?random=5',
+    postImage: uploadStore.uploadFileURL,
+    likes: 0,
+    date: getToday(),
+    liked: false,
+    content: uploadStore.uploadContent,
+    filter: uploadStore.uploadFileFilter,
   }
+  postStore.addPostToTop(myPost)
+  uploadStore.reset()
 }
 
 // Image upload 함수
 function uploadImage(e) {
   let file = e.target.files
   let url = URL.createObjectURL(file[0])
-  uploadFileURL.value = url
-  uploadFileFilter.value = ''
-  step.value++
-}
-
-// filter select 함수
-function handleSelectFilter(filterName) {
-  if (uploadFileFilter.value == filterName) {
-    uploadFileFilter.value = ''
-  } else {
-    uploadFileFilter.value = filterName
-  }
-}
-
-// content write 함수
-function handleWriteContent(content) {
-  uploadContent.value = content
-}
-
-// Publish 함수
-function publish() {
-  let myPost = {
-    name: 'Ryu Yewon',
-    userImage: 'https://picsum.photos/100?random=5',
-    postImage: uploadFileURL.value,
-    likes: 0,
-    date: getToday(),
-    liked: false,
-    content: uploadContent.value,
-    filter: uploadFileFilter.value,
-  }
-  postList.value.unshift(myPost)
-  step.value = 0
+  uploadStore.setUploadFileURL(url)
+  uploadStore.setUploadFileFilter('')
+  uploadStore.setStep(1)
 }
 
 // 오늘 날짜 함수
@@ -134,30 +106,25 @@ function getToday() {
 <!-- template -->
 <template>
   <div class="header">
-    <ul class="header-button-left" v-if="step > 0" @click="step--">
+    <ul
+      class="header-button-left"
+      v-if="uploadStore.step > 0"
+      @click="uploadStore.setStep(uploadStore.step - 1)"
+    >
       <li>Cancel</li>
     </ul>
-    <ul class="header-button-right" v-if="step > 0">
-      <li v-if="step == 1" @click="step++">Next</li>
-      <li v-else-if="step == 2" @click="publish()">Publish</li>
+    <ul class="header-button-right" v-if="uploadStore.step > 0">
+      <li v-if="uploadStore.step == 1" @click="uploadStore.setStep(2)">Next</li>
+      <li v-else-if="uploadStore.step == 2" @click="publish()">Publish</li>
     </ul>
     <img src="./assets/logo.svg" class="logo" />
   </div>
 
-  <Container
-    :postList="postList"
-    :filters="filters"
-    :step="step"
-    :uploadFileURL="uploadFileURL"
-    :uploadFileFilter="uploadFileFilter"
-    :uploadContent="uploadContent"
-    @toggle-like="handleToggleLike"
-    @select-filter="handleSelectFilter"
-    @write-content="handleWriteContent"
-  />
+  <!-- Container -->
+  <Container :filters="filters" />
 
   <div class="footer">
-    <ul class="footer-button-plus" v-if="step == 0">
+    <ul class="footer-button-plus" v-if="uploadStore.step == 0">
       <input type="file" id="file" class="inputfile" @change="uploadImage" />
       <label for="file" class="input-plus">+</label>
     </ul>
