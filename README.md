@@ -1,6 +1,6 @@
 # 인스타그램 클론 프로젝트 (Vue.js 3)
 
-[배포된 사이트 바로가기](https://dulcet-cocada-7efa1f.netlify.app)
+[배포된 사이트 바로가기](https://from-ryw-vue-insta.netlify.app/)
 
 ![프로젝트 미리보기](./src/assets/vue-instagram.gif)
 
